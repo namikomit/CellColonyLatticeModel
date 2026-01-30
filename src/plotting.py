@@ -97,6 +97,104 @@ def load_simulation_data(data_path: Path, run_name: str) -> dict:
     return data
 
 
+def build_cell_grid(c_data):
+    """
+    Build a 2D cell grid from sparse cell data.
+
+    Args:
+        c_data: Sparse cell data array (4 x N) with rows, cols, layers, cell_types
+
+    Returns:
+        c_grid: 2D array with cell types (0=empty, 1=resistant, 2=sensitive)
+        bounds: tuple of (ymin, ymax, xmin, xmax)
+    """
+    ymin = np.min(c_data[0])
+    ymax = np.max(c_data[0])
+    xmin = np.min(c_data[1])
+    xmax = np.max(c_data[1])
+
+    c_grid = np.zeros((int(ymax - ymin + 1), int(xmax - xmin + 1)))
+    c_grid[c_data[0] - ymin, c_data[1] - xmin] = c_data[3]
+    c_grid[(c_grid < 11) & (c_grid > 0)] = 1  # Resistant
+    c_grid[c_grid > 10] = 2  # Sensitive
+
+    return c_grid, (ymin, ymax, xmin, xmax)
+
+
+def plot_interface_magnified(data: dict, run_name: str, save_path: str = None,
+                              width_um: int = 1000, scalebar_um: int = 200):
+    """
+    Plot a magnified view of the interface between resistant and sensitive cells.
+
+    Args:
+        data: Dictionary containing simulation data
+        run_name: Name of the simulation run
+        save_path: If provided, save the figure to this path
+        width_um: Width of the magnified region in micrometers (default: 1000)
+        scalebar_um: Length of scale bar in micrometers (default: 200)
+
+    Returns:
+        fig, ax: matplotlib figure and axes objects
+    """
+    c_data = data['c_data']
+
+    # Build full grid
+    c_grid, (ymin, ymax, xmin, xmax) = build_cell_grid(c_data)
+
+    # Find interface between resistant and sensitive cells
+    resistant_mask = (c_data[3] >= 1) & (c_data[3] <= 10)
+    sensitive_mask = (c_data[3] >= 11) & (c_data[3] <= 20)
+
+    resistant_cols = c_data[1][resistant_mask]
+    sensitive_cols = c_data[1][sensitive_mask]
+
+    interface_col = (np.max(resistant_cols) + np.min(sensitive_cols)) // 2
+    center_row = (ymin + ymax) // 2
+
+    # Define magnification region
+    half_width = width_um // 2
+    col_start = max(0, int(interface_col - half_width - xmin))
+    col_end = min(c_grid.shape[1], int(interface_col + half_width - xmin))
+    row_start = max(0, int(center_row - half_width - ymin))
+    row_end = min(c_grid.shape[0], int(center_row + half_width - ymin))
+
+    # Extract magnified region
+    mag_grid = c_grid[row_start:row_end, col_start:col_end]
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.imshow(mag_grid, cmap=ListedColormap(['black', 'blue', 'yellow']),
+              interpolation='nearest', aspect='equal')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.axis('off')
+
+    # Add scale bar (1 pixel = 1 µm since cdx=1)
+    if HAS_SCALEBAR:
+        scalebar = ScaleBar(
+            1, 'um',
+            fixed_value=scalebar_um,
+            fixed_units='um',
+            location='lower right',
+            color='black',
+            box_alpha=0,
+            scale_loc='none',
+            border_pad=0.5,
+        )
+        ax.add_artist(scalebar)
+    else:
+        print("Warning: matplotlib_scalebar not installed. Skipping scale bar.")
+
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight',
+                    facecolor='white', pad_inches=0.02)
+        print(f"Saved magnified interface to: {save_path}")
+
+    return fig, ax
+
+
 def plot_colony(data: dict, run_name: str, scale_bar: bool = True, save_path: str = None):
     """
     Plot the cell colony grid.
@@ -113,15 +211,7 @@ def plot_colony(data: dict, run_name: str, scale_bar: bool = True, save_path: st
     print("Run info:")
     print(run_info)
 
-    ymin = np.min(c_data[0])
-    ymax = np.max(c_data[0])
-    xmin = np.min(c_data[1])
-    xmax = np.max(c_data[1])
-
-    c_grid = np.zeros((int(ymax - ymin + 1), int(xmax - xmin + 1)))
-    c_grid[c_data[0] - ymin, c_data[1] - xmin] = c_data[3]
-    c_grid[(c_grid < 11) & (c_grid > 0)] = 1
-    c_grid[c_grid > 10] = 2
+    c_grid, _ = build_cell_grid(c_data)
 
     fig, ax = plt.subplots()
     ax.matshow(c_grid, cmap=ListedColormap(['black', 'blue', 'yellow']))
@@ -194,6 +284,23 @@ def main():
         action="store_true",
         help="List available simulation runs"
     )
+    parser.add_argument(
+        "--magnify",
+        action="store_true",
+        help="Plot magnified view of the interface region"
+    )
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=1000,
+        help="Width of magnified region in micrometers (default: 1000)"
+    )
+    parser.add_argument(
+        "--scalebar",
+        type=int,
+        default=200,
+        help="Scale bar length in micrometers (default: 200)"
+    )
 
     args = parser.parse_args()
 
@@ -222,7 +329,16 @@ def main():
 
     # Load and plot
     data = load_simulation_data(data_path, args.run)
-    plot_colony(data, args.run, scale_bar=not args.no_scale_bar, save_path=args.save)
+
+    if args.magnify:
+        plot_interface_magnified(
+            data, args.run,
+            save_path=args.save,
+            width_um=args.width,
+            scalebar_um=args.scalebar
+        )
+    else:
+        plot_colony(data, args.run, scale_bar=not args.no_scale_bar, save_path=args.save)
 
     plt.show(block=False)
     input("Press Enter to continue...")
