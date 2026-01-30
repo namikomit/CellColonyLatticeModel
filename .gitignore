@@ -1,0 +1,24 @@
+# Data files (large, downloaded separately)
+data/*.rar
+data/2drop_*/
+
+# Generated output files
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
