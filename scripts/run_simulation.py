@@ -1,13 +1,18 @@
 import re
 import os
+import sys
 import numpy as np
-import LM_func22 as lm
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src import lattice_model as lm
+
 import ray
 from tqdm import tqdm
 from scipy.sparse.linalg import spilu, LinearOperator
 
 env = "cluster"
-working_dir = r"/nbi/user-scratch/c/chv625/LM" # path to directory where this and LM_func22.py are found
+working_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # path to project root directory
 
 def apply_preconditioner(v):
     return LU_comp.solve(v)
