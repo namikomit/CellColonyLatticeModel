@@ -188,6 +188,9 @@ def plot_interface_magnified(data: dict, run_name: str, save_path: str = None,
     plt.tight_layout()
 
     if save_path:
+        # Default to TIFF format if no extension specified
+        if not any(save_path.endswith(ext) for ext in ['.tiff', '.tif', '.png', '.pdf', '.eps', '.svg']):
+            save_path = save_path + '.tiff'
         plt.savefig(save_path, dpi=300, bbox_inches='tight',
                     facecolor='white', pad_inches=0.02)
         print(f"Saved magnified interface to: {save_path}")
@@ -277,7 +280,7 @@ def main():
         "--save",
         type=str,
         default=None,
-        help="Save figure to this path (e.g., output.tiff)"
+        help="Save figure to this path (default format: .tiff for magnified, .png otherwise)"
     )
     parser.add_argument(
         "--list",
