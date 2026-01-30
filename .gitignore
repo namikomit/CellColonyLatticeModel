@@ -1,13 +1,18 @@
 # Data files (large, downloaded separately)
 data/*.rar
 data/2drop_*/
+data/*.csv
+data/*.npy
 
 # Generated output files
 results/
+results/*.png
+results/*.tiff
 
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 *.egg-info/
 .eggs/
 dist/
@@ -17,8 +22,15 @@ build/
 .env
 .venv/
 venv/
+env/
 
 # IDE
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
