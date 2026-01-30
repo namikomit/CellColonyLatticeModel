@@ -55,8 +55,8 @@ python3 src/plotting.py --list
 # Plot a specific run (full colony view)
 python3 src/plotting.py --run 2drop_CRE11001000_rp1_icc75000_g0.025_ka2.3_A0_0
 
-# Plot magnified interface view (1000 µm width, 200 µm scale bar)
-python3 src/plotting.py --run <run_name> --magnify --save output.png
+# Plot magnified interface view (1000 µm width, 200 µm scale bar, saves as TIFF by default)
+python3 src/plotting.py --run <run_name> --magnify --save output
 
 # Custom magnification settings
 python3 src/plotting.py --run <run_name> --magnify --width 500 --scalebar 100

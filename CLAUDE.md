@@ -47,7 +47,7 @@ Cell types: 1-10 = resistant (growth stages), 11-20 = sensitive (growth stages)
 ### Plot simulation results
 ```bash
 python3 src/plotting.py --run <run_name>              # Full colony view
-python3 src/plotting.py --run <run_name> --magnify    # Magnified interface (1000 µm)
+python3 src/plotting.py --run <run_name> --magnify --save output  # Saves as output.tiff
 python3 src/plotting.py --run <run_name> --magnify --width 500 --scalebar 100
 python3 src/plotting.py --list  # List available runs
 ```
