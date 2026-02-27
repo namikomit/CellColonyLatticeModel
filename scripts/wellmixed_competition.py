@@ -13,7 +13,7 @@ dN/dt = -(dR/dt + dS/dt)    [One cell division consumes one unit of nutrient]
 
 Where:
 - f_N(N) = N/(k_N + N)                : Monod nutrient limitation
-- f_A(A) = 1/(1 + (A/k_A)³)           : Hill antibiotic inhibition
+- f_A(A) = 1/(1 + (A/k_A)³)      for A<4, linear interpolation to 0     : Hill antibiotic inhibition
 - γ : antibiotic degradation rate by R cells (NO background decay)
 - K : carrying capacity (max cells in 1 mL)
 
@@ -42,19 +42,17 @@ class Parameters:
         self.lambda_s = 1.93  # h⁻¹, sensitive growth rate
         
         # Convert to per-minute for consistency with spatial code
-        self.lambda_r_min = self.lambda_r / 60  # min⁻¹
-        self.lambda_s_min = self.lambda_s / 60  # min⁻¹
+        self.lambda_r_min = self.lambda_r / (np.log(2) * 60)  # min⁻¹
+        self.lambda_s_min = self.lambda_s / (np.log(2) * 60)  # min⁻¹
         
         # Antibiotic parameters (from spatial model)
         self.k_A = 2.35       # μg/mL, antibiotic IC50
         self.gamma = 2.78e-5  # min⁻¹, degradation rate per R cell
         
         # Nutrient parameters
-        self.k_N = 0.0        # Nutrient Monod constant
+        self.k_N = 5e8       # Nutrient Monod constant cells/mL
                               # Set to 0 for no nutrient limitation (saturating)
         
-        # Carrying capacity (logistic growth)
-        self.K = 5e8          # cells/mL, carrying capacity (Monod constant)
         
         # Volume
         self.volume = 1.0     # mL
@@ -66,7 +64,6 @@ class Parameters:
                 f"  k_A = {self.k_A:.2f} μg/mL\n"
                 f"  γ = {self.gamma:.2e} min⁻¹\n"
                 f"  k_N = {self.k_N:.2f}\n"
-                f"  K = {self.K:.2e} cells/mL\n"
                 f"  Volume = {self.volume} mL\n")
 
 # ============================================================================
@@ -109,8 +106,12 @@ def ode_system(t, y, params):
         f_N = 1.0  # No nutrient limitation (saturating)
     
     # Antibiotic inhibition term (Hill function with n=3)
-    if A > 0:
+    if A > 0 and A < 4:
         f_A = 1.0 / (1.0 + (A / params.k_A)**3)
+    elif A >=4 and A < 5: 
+        f_A = 1.0 / (1.0 + (4 / params.k_A)**3)*(5-A)  # Linear interpolation to 0 between 4 and 5 μg/mL
+    elif A >= 5:
+        f_A = 0.0  # Complete inhibition above 5 μg/mL
     else:
         f_A = 1.0  # No antibiotic inhibition
 
@@ -513,13 +514,13 @@ def main():
     # -------------------------------------------------------------------------
     # User specifications
     # -------------------------------------------------------------------------
-    R0 = 10000       # Initial resistant cells (fixed)
-    S0 = 10000       # Initial sensitive cells (fixed)
+    R0 = 1000       # Initial resistant cells (fixed)
+    S0 = 1000       # Initial sensitive cells (fixed)
     N0 = 1e9         # Initial nutrients (→ final cells ≈ 10⁹)
-    t_max = 48       # Simulation time (hours)
+    t_max = 6       # Simulation time (hours)
     
     # Antibiotic range to test
-    A0_values = np.linspace(0, 10, 21)  # 0 to 10 μg/mL in steps of 0.5
+    A0_values = np.linspace(5, 10, 11)  # 0 to 10 μg/mL in steps of 0.5
     
     print(f"Fixed initial conditions:")
     print(f"  R₀ = {R0:,.0f} cells")
@@ -534,10 +535,10 @@ def main():
     # -------------------------------------------------------------------------
     # Example 1: Single simulation at A₀ = k_A
     # -------------------------------------------------------------------------
-    print("Example 1: Single Simulation at A₀ = k_A = 2.35 μg/mL")
+    print("Example 1: Single Simulation at A₀ = 5 μg/mL")
     print("-" * 70)
     
-    A0_example = params.k_A
+    A0_example = 5
     
     sol = run_simulation(R0, S0, A0_example, N0, t_max, params)
     
