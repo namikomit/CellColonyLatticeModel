@@ -47,7 +47,7 @@ class Parameters:
         
         # Antibiotic parameters (from spatial model)
         self.k_A = 2.35       # μg/mL, antibiotic IC50
-        self.gamma = 2.78e-5  # min⁻¹, degradation rate per R cell
+        self.gamma = 1.25e-10  # min⁻¹, degradation rate per R cell
         
         # Nutrient parameters
         self.k_N = 5e8       # Nutrient Monod constant cells/mL
@@ -514,13 +514,13 @@ def main():
     # -------------------------------------------------------------------------
     # User specifications
     # -------------------------------------------------------------------------
-    R0 = 1000       # Initial resistant cells (fixed)
-    S0 = 1000       # Initial sensitive cells (fixed)
+    R0 = 1e7       # Initial resistant cells (fixed)
+    S0 = 1e7       # Initial sensitive cells (fixed)
     N0 = 1e9         # Initial nutrients (→ final cells ≈ 10⁹)
     t_max = 6       # Simulation time (hours)
     
     # Antibiotic range to test
-    A0_values = np.linspace(5, 10, 11)  # 0 to 10 μg/mL in steps of 0.5
+    A0_values = np.linspace(0, 10, 21)  # 0 to 10 μg/mL in steps of 0.5
     
     print(f"Fixed initial conditions:")
     print(f"  R₀ = {R0:,.0f} cells")
