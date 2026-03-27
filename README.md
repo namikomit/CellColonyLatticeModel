@@ -192,12 +192,12 @@ Cell type encoding: values 1–10 = resistant (division cycle stages), 11–20 =
 - Mireia Cordero
 - Brage H. Thomsen
 - Artemis Talliou
-- Annette K. Ehrmann
+- Anja K. Ehrmann
 - Sine L. Svenningsen
 - Namiko Mitarai
 - Liselotte Jauffred
 
-The simulation model was developed by Brage H. Thomsen and Namiko Mitarai.
+The main part of simulation code was developed by Brage H. Thomsen. Namiko Mitarai developed some part of analalysis and plotting.
 
 ---
 
