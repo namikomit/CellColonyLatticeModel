@@ -1,14 +1,69 @@
 # Cell Colony Lattice Model
 
-A lattice-based simulation model for bacterial cell colony growth and collision dynamics. The model simulates the growth of resistant and sensitive cell populations, including antibiotic diffusion and cell-cell interactions.
+Simulation code accompanying the paper:
 
-## Features
+> **Pushing for survival: Spatial intermixing and indirect resistance enable collective growth**
+> M. Cordero, B.H. Thomsen, A. Talliou, A.K. Ehrmann, S.L. Svenningsen, N. Mitarai, L. Jauffred
 
-- Lattice-based cell growth simulation with configurable parameters
-- Parallel computation using Ray for efficient simulation
-- Antibiotic diffusion modeling with finite difference methods
-- Support for "coffee ring" and "two-drop collision" experimental setups
-- Visualization tools for simulation results
+---
+
+## Overview
+
+This repository contains the lattice-based simulation model used to study how spatial structure and indirect antibiotic resistance shape the outcome of competition between resistant (R) and sensitive (S) bacterial cells growing as colonies on a surface.
+
+The model places cells on a 2D lattice (1 µm grid spacing) and simulates:
+- **Cell growth and division** with mechanical pushing of neighbors (up to a configurable pushing radius)
+- **Antibiotic diffusion** solved via finite differences with no-flux boundary conditions
+- **Antibiotic degradation** by resistant cells, which creates a local protection zone for sensitive neighbours
+- **Parallelised computation** using [Ray](https://www.ray.io/) to distribute the cell-division work across CPU cores
+
+Two main experimental geometries are supported:
+- **Two-drop collision** (`2drop`): a resistant and a sensitive colony grow toward each other and collide
+- **Coffee-ring / mixed drop** (`1drop_co`): a mixed population arranged in an annular ring
+
+---
+
+## Repository structure
+
+```
+CellColonyLatticeModel/
+├── scripts/
+│   ├── LM_func22.py                  # Core simulation library (functions for grid setup,
+│   │                                 #   cell division, diffusion, Ray remote workers)
+│   ├── LM_run_file.py                # Main simulation runner — configure parameters here
+│   │                                 #   and run to produce .npy output files
+│   ├── plot.py                       # Original plotting script: loads .npy output and
+│   │                                 #   displays colony images with a scale bar
+│   │
+│   ├── run_RSR_with_timepoints.py    # Fig. 4 simulation — RSR stripe geometry,
+│   │                                 #   saves spatial snapshots at specified timepoints
+│   ├── RSR_initial_conditions.py     # Helper: creates the R-S-R vertical stripe
+│   │                                 #   initial condition used by the above script
+│   ├── create_panel_figure_pil2.py   # Fig. 4 figure — assembles the multi-panel image
+│   │                                 #   from RSR timeseries snapshots using PIL
+│   │
+│   ├── wellmixed_competition.py      # Well-mixed ODE model (R vs S with antibiotics);
+│   │                                 #   used for comparison, not included in the article
+│   │
+│   ├── analyze_RSR_closure.py        # Analysis: RSR stripe closure width vs time
+│   ├── visualize_timepoints.py       # Visualisation helper for RSR timepoint snapshots
+│   └── download_data.py              # Downloads simulation output data from ERDA
+│
+├── src/
+│   └── plotting.py                   # Enhanced CLI plotting tool for exploring results
+│                                     #   (supports magnification, scale bar, TIFF export)
+│
+├── GrowthRate_Experiment/
+│   ├── growth_rate_analysis.py       # Fits growth curves to experimental OD data
+│   ├── growth_rate_fit.py            # Parameter estimation for growth rate model
+│   └── *.csv                         # Raw growth assay data
+│
+├── data/                             # Simulation output (not tracked in git)
+├── results/                          # Generated figures (not tracked in git)
+└── requirements.txt
+```
+
+---
 
 ## Installation
 
@@ -23,79 +78,129 @@ A lattice-based simulation model for bacterial cell colony growth and collision 
    pip install -r requirements.txt
    ```
 
-3. (Optional) For extracting downloaded data, install unrar:
+3. (Optional) To extract downloaded data archives, install `unrar`:
    ```bash
    # Ubuntu/Debian
    sudo apt install unrar
-
-   # Or use the Python package
-   pip install rarfile
    ```
 
-## Downloading Data
+---
 
-Simulation data is hosted on ERDA and can be downloaded using the provided script:
+## Running simulations
 
-```bash
-# Download data files
-python3 scripts/download_data.py
+> **Note:** Simulations are computationally intensive and were run on a compute cluster using 25 CPU cores. Expect multi-hour runtimes even on a workstation. All scripts with cluster-specific file paths are noted below — update the `working_dir` / `save_dir` variables before running locally.
 
-# Download and extract
-python3 scripts/download_data.py --extract
-```
+### Main simulation (Figs. 1–3)
 
-## Usage
-
-### Plotting Simulation Results
+Edit parameters and paths at the top of the script, then run:
 
 ```bash
-# List available simulation runs
-python3 src/plotting.py --list
-
-# Plot a specific run (full colony view)
-python3 src/plotting.py --run 2drop_CRE11001000_rp1_icc75000_g0.025_ka2.3_A0_0
-
-# Plot magnified interface view (1000 µm width, 200 µm scale bar, saves as TIFF by default)
-python3 src/plotting.py --run <run_name> --magnify --save output
-
-# Custom magnification settings
-python3 src/plotting.py --run <run_name> --magnify --width 500 --scalebar 100
-
-# Save plot to file
-python3 src/plotting.py --run <run_name> --save output.png
-
-# Use custom data path
-python3 src/plotting.py --data-path /path/to/data --run <run_name>
+python scripts/LM_run_file.py
 ```
 
-### Running Simulations
+Key parameters to set:
+- `working_dir` — path to the directory containing `LM_run_file.py` and `LM_func22.py`
+- `exp_setup` — `"2drop"` for collision experiment, `"1drop_co"` for coffee-ring
+- `a_conc` — list of initial antibiotic concentrations to sweep over
+- `pushing_radius`, `k_A`, `g_nonnorm` — physical model parameters
+
+Output `.npy` files are written to `data/<run_name>/`.
+
+### Fig. 4 simulation (RSR stripe)
 
 ```bash
-python3 scripts/run_simulation.py
+python scripts/run_RSR_with_timepoints.py
 ```
 
-Note: Running simulations requires significant computational resources and is typically done on a cluster environment.
+Update `working_dir` and `save_dir` inside the script to point to your local paths. The script iterates over a list of sensitive-stripe widths and saves spatial snapshots at specified timepoints.
 
-## Project Structure
+### Fig. 4 panel figure
 
+```bash
+python scripts/create_panel_figure_pil2.py
 ```
-CellColonyLatticeModel/
-├── src/
-│   ├── lattice_model.py    # Core simulation functions
-│   └── plotting.py         # Visualization tools
-├── scripts/
-│   ├── run_simulation.py   # Main simulation runner
-│   └── download_data.py    # Data download utility
-├── data/                   # Simulation data (not in git)
-├── results/                # Generated plots (not in git)
-└── docs/                   # Documentation
+
+Update `data_dir` and `output_dir` at the top of the script.
+
+### Well-mixed ODE model
+
+```bash
+python scripts/wellmixed_competition.py
 ```
+
+Runs entirely locally; no path configuration required. Saves three figures (`wellmixed_single.png`, `wellmixed_scan.png`, `wellmixed_phase.png`) to the current directory.
+
+---
+
+## Downloading simulation data
+
+Pre-computed simulation output is hosted on ERDA and can be downloaded with:
+
+```bash
+python scripts/download_data.py          # download only
+python scripts/download_data.py --extract  # download and extract
+```
+
+---
+
+## Visualising results
+
+### Original plot script
+
+Edit the `main_path` and `run_name` variables at the top of `scripts/plot.py`, then run:
+
+```bash
+python scripts/plot.py
+```
+
+### Enhanced CLI tool
+
+```bash
+# List available runs in data/
+python src/plotting.py --list
+
+# Full colony view
+python src/plotting.py --run <run_name>
+
+# Magnified interface view saved as TIFF (default)
+python src/plotting.py --run <run_name> --magnify --save output
+
+# Custom width and scale bar
+python src/plotting.py --run <run_name> --magnify --width 500 --scalebar 100
+```
+
+---
+
+## Data format
+
+Each simulation produces a set of `.npy` files in `data/<run_name>/`:
+
+| File | Contents |
+|---|---|
+| `*_cell_grid.npy` | Sparse cell positions: rows (row, col, layer, cell_type) |
+| `*_run_info.npy` | 2D array of [parameter\_name, value] pairs |
+| `*_r_at_t.npy` | Resistant cell count at each timestep |
+| `*_s_at_t.npy` | Sensitive cell count at each timestep |
+| `*_antibiotic_grid.npy` | Final antibiotic concentration field |
+
+Cell type encoding: values 1–10 = resistant (division cycle stages), 11–20 = sensitive.
+
+---
 
 ## Authors
 
-- Brage HT
+- Mireia Cordero
+- Brage H. Thomsen
+- Artemis Talliou
+- Annette K. Ehrmann
+- Sine L. Svenningsen
 - Namiko Mitarai
+- Liselotte Jauffred
+
+The simulation model was developed by Brage H. Thomsen and Namiko Mitarai.
+
+---
 
 ## License
 
-This project is for research purposes.
+This code is made available for research and reproducibility purposes in conjunction with the above publication.

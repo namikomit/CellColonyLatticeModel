@@ -24,10 +24,10 @@ plt.ioff()  # Turn off interactive mode
 # ============================================================================
 
 # Data directory
-data_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries_2")
+data_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries_2")  # <-- update to your local data directory
 
 # Output directory
-output_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/results/timepoints_2")
+output_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/results/timepoints_2")  # <-- update to your local output directory
 output_dir.mkdir(parents=True, exist_ok=True)
 
 # DISPLAY RANGE (in diffusion grid coordinates, None = auto)

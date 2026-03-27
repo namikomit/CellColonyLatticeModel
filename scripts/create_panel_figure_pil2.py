@@ -12,8 +12,8 @@ from pathlib import Path
 from scipy.ndimage import zoom
 
 # Configuration
-data_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries")
-output_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/results")
+data_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries")  # <-- update to your local data directory
+output_dir = Path("/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/results")  # <-- update to your local output directory
 output_dir.mkdir(exist_ok=True)
 
 # Display range (in diffusion grid coordinates)

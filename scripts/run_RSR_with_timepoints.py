@@ -15,11 +15,11 @@ from scipy.sparse.linalg import spilu, LinearOperator
 
 # Import the RSR initial condition function
 import sys
-sys.path.append('/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/code')
+sys.path.append('/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/code')  # <-- update to the directory containing RSR_initial_conditions.py
 from RSR_initial_conditions import create_RSR_vertical_stripe_geometry
 
 env = "cluster"
-working_dir = r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/code"
+working_dir = r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/code"  # <-- update to the directory containing this script and LM_func22.py
 
 def apply_preconditioner(v):
     return LU_comp.solve(v)
@@ -173,7 +173,7 @@ for w_sensitive in sensitive_widths:
     ], dtype=object)
     
     " SETUP SAVING "
-    save_dir = r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries_2"
+    save_dir = r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_timeseries_2"  # <-- update to your local output directory
     os.makedirs(save_dir, exist_ok=True)
     
     # Create subdirectory for this run's timepoints

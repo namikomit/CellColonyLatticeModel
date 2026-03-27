@@ -7,7 +7,7 @@ from tqdm import tqdm
 from scipy.sparse.linalg import spilu, LinearOperator
 
 env = "cluster"
-working_dir = r"/nbi/user-scratch/c/chv625/LM" # path to directory where this and LM_func22.py are found
+working_dir = r"/nbi/user-scratch/c/chv625/LM"  # <-- update to the directory containing LM_run_file.py and LM_func22.py
 
 def apply_preconditioner(v):
     return LU_comp.solve(v)

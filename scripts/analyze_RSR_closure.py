@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 
 # Path to simulation data
-data_dir = Path(r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_closure")
+data_dir = Path(r"/nbi/nbicmplx/cell/mitarai/IndirectResistance/Brage/CellColonyLatticeModel/data/RSR_closure")  # <-- update to your local data directory
 
 def load_simulation_data(data_dir, w):
     """Load data for a specific sensitive width."""

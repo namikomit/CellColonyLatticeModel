@@ -5,12 +5,13 @@ import os
 from matplotlib.colors import ListedColormap
 from matplotlib_scalebar.scalebar import ScaleBar # might need to install this package
 
-# path to folder containing simulation data
-main_path = rf"E:\cell_lattice\data\no_pushing"
+# ---- SET THESE BEFORE RUNNING ------------------------------------------------
+# Path to the folder containing simulation run directories
+main_path = rf"E:\cell_lattice\data\no_pushing"   # <-- update to your local path
 
-
-# name of simulation folder
-run_name = "2drop_CRE11001000_rp1_icc75000_g0.025_ka2.3_A4_0"
+# Name of the simulation run folder to plot
+run_name = "2drop_CRE11001000_rp1_icc75000_g0.025_ka2.3_A4_0"  # <-- update to your run name
+# ------------------------------------------------------------------------------
 scale_bar = True
 
 
