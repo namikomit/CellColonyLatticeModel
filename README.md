@@ -3,6 +3,7 @@
 Simulation code accompanying the paper:
 
 > **Pushing for survival: Spatial intermixing and indirect resistance enable collective growth**
+> 
 > M. Cordero, B.H. Thomsen, A. Talliou, A.K. Ehrmann, S.L. Svenningsen, N. Mitarai, L. Jauffred
 
 ---
