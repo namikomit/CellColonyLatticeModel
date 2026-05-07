@@ -201,7 +201,7 @@ Cell type encoding: values 1–10 = resistant (division cycle stages), 11–20 =
 - Namiko Mitarai
 - Liselotte Jauffred
 
-The main part of simulation code was developed by Brage H. Thomsen. Namiko Mitarai developed some part of analalysis and plotting, with using Claude Cade.
+The main part of simulation code was developed by Brage H. Thomsen. Namiko Mitarai developed some part of analalysis and plotting, with using Claude Code.
 
 ---
 
