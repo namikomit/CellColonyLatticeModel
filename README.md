@@ -91,7 +91,7 @@ CellColonyLatticeModel/
 
 > **Note:** Simulations are computationally intensive and were run on a compute cluster using 25 CPU cores. Expect multi-hour runtimes even on a workstation. All scripts with cluster-specific file paths are noted below — update the `working_dir` / `save_dir` variables before running locally.
 >
-## Growth rate fit (Fig 1a)
+### Growth rate fit (Fig 1a)
 GrowthRate_Experiment/
 
 ### Main simulation (Figs. 1–3)
